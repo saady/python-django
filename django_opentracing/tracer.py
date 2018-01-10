@@ -97,10 +97,12 @@ class DjangoTracer(object):
                     except UnicodeDecodeError:
                         span.set_tag(attr, payload.decode('utf-8'))
         
-        for query in sql_queries:
-            span.set_tag('SQL', query)
+        new_span = self._tracer.start_span(operation_name=operation_name, child_of=span)
 
-        return span
+        for query in sql_queries:
+            print query
+            new_span.set_tag('SQL', query)
+        return new_span
 
 
     def _finish_tracing(self, request):
