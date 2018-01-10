@@ -56,7 +56,7 @@ class DjangoTracer(object):
             return wrapper
         return decorator
 
-    def _apply_tracing(self, request, view_func, attributes, sql_queries):
+    def _apply_tracing(self, request, view_func, attributes):
         '''
         Helper function to avoid rewriting for middleware and decorator.
         Returns a new span from the request with logged attributes and 
@@ -96,14 +96,7 @@ class DjangoTracer(object):
                         span.set_tag(attr, payload)
                     except UnicodeDecodeError:
                         span.set_tag(attr, payload.decode('utf-8'))
-        
-        new_span = self._tracer.start_span(operation_name=operation_name, child_of=span)
-
-        for query in sql_queries:
-            print query
-            new_span.set_tag('SQL', query)
-        return new_span
-
+        return span
 
     def _finish_tracing(self, request):
         span = self._current_spans.pop(request, None)
