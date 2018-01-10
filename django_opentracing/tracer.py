@@ -87,11 +87,13 @@ class DjangoTracer(object):
         # log any traced attributes
         for attr in attributes:
             if hasattr(request, attr):
-                payload = str(getattr(request, attr))
+                try:
+                    payload = str(getattr(request, attr))
+                except UnicodeEncodeError:
+                    payload = u''.join((getattr(request, attr))).encode('utf-8')
                 if payload:
                     span.set_tag(attr, payload)
-        
-        return span  
+        return span
 
     def _finish_tracing(self, request):
         span = self._current_spans.pop(request, None)     
