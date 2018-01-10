@@ -92,11 +92,14 @@ class DjangoTracer(object):
                 except UnicodeEncodeError:
                     payload = u''.join((getattr(request, attr))).encode('utf-8')
                 if payload:
-                    span.set_tag(attr, payload)
+                    try:
+                        span.set_tag(attr, payload)
+                    except UnicodeDecodeError:
+                        span.set_tag(attr, payload.decode('utf-8'))
         return span
 
     def _finish_tracing(self, request):
-        span = self._current_spans.pop(request, None)     
+        span = self._current_spans.pop(request, None)
         if span is not None:
             span.finish()
 
