@@ -1,5 +1,7 @@
 from django.conf import settings
 from django_opentracing.tracer import initialize_global_tracer
+from django.db import connection
+
 try:
     # Django >= 1.10
     from django.utils.deprecation import MiddlewareMixin
@@ -33,7 +35,8 @@ class OpenTracingMiddleware(MiddlewareMixin):
             traced_attributes = getattr(settings, 'OPENTRACING_TRACED_ATTRIBUTES')
         else: 
             traced_attributes = []
-        self._tracer._apply_tracing(request, view_func, traced_attributes)
+        
+        self._tracer._apply_tracing(request, view_func, traced_attributes, connection.queries)
 
     def process_response(self, request, response):
         self._tracer._finish_tracing(request)
