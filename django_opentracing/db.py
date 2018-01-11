@@ -6,9 +6,6 @@ from django.db import connections
 log = logging.getLogger(__name__)
 
 
-CURSOR_ATTR = '_jaeger_cursor'
-
-
 def patch_db(tracer):
     """
     patch database
@@ -21,14 +18,8 @@ def patch_conn(tracer, conn):
     """
     Patch connection
     """
-    if hasattr(conn, CURSOR_ATTR):
-        log.debug('already patched')
-        return
-
-    setattr(conn, CURSOR_ATTR, conn.cursor)
-
     def cursor():
-        return TracedCursor(tracer, conn, conn._jaeger_cursor())
+        return TracedCursor(tracer, conn, conn.cursor())
 
     conn.cursor = cursor
 
