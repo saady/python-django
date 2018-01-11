@@ -2,7 +2,6 @@ import logging
 
 from django.db import connections
 
-import opentracing
 
 log = logging.getLogger(__name__)
 
@@ -59,9 +58,9 @@ class TracedCursor(object):
         self.tracer.service_name = self._service
 
         span = self.tracer.start_span(operation_name=func.__name__)
-        span.set_tag(opentracing.ext.tags.DATABASE_STATEMENT, sql)
-        span.set_tag(opentracing.ext.tag.DATABASE_TYPE, self._vendor)
-        span.set_tag(opentracing.ext.tag.DATABASE_USER, self._alias)
+        span.set_tag('db.statement', sql)
+        span.set_tag('db.type', self._vendor)
+        span.set_tag('db.user', self._alias)
         return span
 
     def callproc(self, procname, params=None):
